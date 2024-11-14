@@ -4,90 +4,97 @@
 
 using namespace std;
 
-struct Vertex
+using NodeRef = shared_ptr<struct Node>;
+
+struct Node
 {
-	//int data;
+	Node() {}
+	Node(const string& data) : data(data) {}
+
+	string				data;
+	vector<NodeRef>		children;
 };
 
-vector<Vertex> vertices;
-vector<vector<int>> adjacents;
-
-void CreateGraph()
+NodeRef CreateTree()
 {
-	vertices.resize(6);
-	adjacents = vector<vector<int>>(6, vector<int>(6, -1));
-
-	adjacents[0][1] = 15;
-	adjacents[0][3] = 35;
-	adjacents[1][0] = 15;
-	adjacents[1][2] = 5;
-	adjacents[1][3] = 10;
-	adjacents[3][4] = 5;
-	adjacents[5][4] = 5;
-}
-
-void Dijikstra(int here)
-{
-	struct VertexCost
+	NodeRef root = make_shared<Node>("R1 개발실");
 	{
-		int vertex;
-		int cost;
-	};
-
-	list<VertexCost> discovered;		// 발견 목록
-	vector<int> best(6, INT32_MAX);		// 각 정점별로 지금까지 발견한 최소거리
-	vector<int> parent(6, -1);
-
-	discovered.push_back(VertexCost{ here, 0 });
-	best[here] = 0;
-	parent[here] = here;
-
-	while (discovered.empty() == false)
-	{
-		// 제일 좋은 후보를 찾는다.
-		list<VertexCost>::iterator bestIt;
-		int bestCost = INT32_MAX;
-
-		for (auto it = discovered.begin(); it != discovered.end(); it++)
+		NodeRef node = make_shared<Node>("디자인팀");
+		root->children.push_back(node);
 		{
-			const int cost = it->cost;
-
-			if (cost < bestCost)
-			{
-				bestCost = cost;
-				bestIt = it;
-			}
+			NodeRef leaf = make_shared<Node>("전투");
+			node->children.push_back(leaf);
 		}
-
-		int cost = bestIt->cost;
-		here = bestIt->vertex;
-		discovered.erase(bestIt);
-
-		// 방문? 더 짧은 경로를 뒤늦게 찾았다면 skip
-		if (best[here] < cost)
-			continue;
-
-		// 방문!
-		for (int there = 0; there < 6; there++)
 		{
-			// 연결되지 않았으면 스킵.
-			if (adjacents[here][there] == -1)
-				continue;
-
-			// 더 좋은 경로를 과거에 찾았으면 스킵.
-			int nextCost = best[here] + adjacents[here][there];
-			if (nextCost >= best[there])
-				continue;
-
-			best[there] = nextCost;
-			parent[there] = here;
-
-			discovered.push_back(VertexCost{ there, nextCost });
+			NodeRef leaf = make_shared<Node>("경제");
+			node->children.push_back(leaf);
+		}
+		{
+			NodeRef leaf = make_shared<Node>("스토리");
+			node->children.push_back(leaf);
 		}
 	}
+	{
+		NodeRef node = make_shared<Node>("프로그래밍팀");
+		root->children.push_back(node);
+		{
+			NodeRef leaf = make_shared<Node>("서버");
+			node->children.push_back(leaf);
+		}
+		{
+			NodeRef leaf = make_shared<Node>("클라");
+			node->children.push_back(leaf);
+		}
+		{
+			NodeRef leaf = make_shared<Node>("엔진");
+			node->children.push_back(leaf);
+		}
+	}
+	{
+		NodeRef node = make_shared<Node>("아트팀");
+		root->children.push_back(node);
+		{
+			NodeRef leaf = make_shared<Node>("배경");
+			node->children.push_back(leaf);
+		}
+		{
+			NodeRef leaf = make_shared<Node>("캐릭터");
+			node->children.push_back(leaf);
+			{
+				NodeRef leaf2 = make_shared<Node>("더미");
+				leaf->children.push_back(leaf2);
+			}
+		}
+	}
+
+	return root;
+}
+
+void PrintTree(NodeRef root, int depth)
+{
+	for (int i = 0; i < depth; i++)
+		cout << "-";
+
+	cout << root->data << endl;
+
+	for (NodeRef& child : root->children)
+		PrintTree(child, depth + 1);
+}
+
+int GetHeight(NodeRef root)
+{
+	int height = 1;
+
+	for (NodeRef& child : root->children)
+		height = max(height, GetHeight(child) + 1);
+
+	return height;
 }
 
 int main()
 {
+	NodeRef root = CreateTree();
+	PrintTree(root, 0);
 
+	cout << "height : " << GetHeight(root) << endl;
 }
