@@ -204,7 +204,7 @@ void Player::AStar()
 
 	enum
 	{
-		DIR_COUNT = 8	//4 or 8(consider diagonal)
+		DIR_COUNT = 4	//4 or 8(consider diagonal)
 	};
 
 	Pos front[] =
